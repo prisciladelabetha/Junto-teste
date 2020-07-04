@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  junto-postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: "19prdlbth91#"
+    ports:
+      - "15432:5432"
+    volumes:
+      - /var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d/
+    networks:
+      - postgres-compose-network
+
+  junto-pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "pri.delabetha@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "19prdlbth91#"
+    ports:
+      - "16543:80"
+    depends_on:
+      - junto-postgres
+    networks:
+      - postgres-compose-network
+
+networks:
+  postgres-compose-network:
+    driver: bridge
