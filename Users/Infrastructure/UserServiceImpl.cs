@@ -28,8 +28,9 @@ namespace Junto.Users.Infrastructure
             {
                 throw new Exception("User already registered");
             }
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
-            await this.UserRepository.Create(new User(Guid.NewGuid(), username, password));
+            await this.UserRepository.Create(new User(Guid.NewGuid(), username, hashedPassword));
         }
     }
 }
