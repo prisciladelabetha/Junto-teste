@@ -29,7 +29,7 @@ namespace Junto.Controllers
             }
             catch(Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { error = e.Message});
             }
         }
 
@@ -40,12 +40,34 @@ namespace Junto.Controllers
             try
             {
                 await this.UserService.Signup(signupDto.username, signupDto.password);
-                return Ok("OK!");
+                return Ok( new { message = "Ok!"});
             }
             catch(Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { error = e.Message});
             }
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            try
+            {
+                var username = User.Identity.Name;
+                await this.UserService.ChangePassword(username, changePasswordDto.oldPassword, changePasswordDto.newPassword);
+                return Ok( new { message = "Password changed"});
+            }
+            catch(Exception e)
+            {
+                return BadRequest(new { error = e.Message});
+            }
+        }
+
+        public class ChangePasswordDto
+        {
+            public string oldPassword { get; set; }
+            public string newPassword { get; set; }
         }
 
         public class SignupDto

@@ -36,10 +36,23 @@ namespace Junto.Users.Infrastructure
         public Task<User> FindByuserName(string username)
         {
             return DbConnection.QuerySingleOrDefaultAsync<User>(@"
-            SELECT * FROM 
-                users 
-            WHERE username = @username",
-            new { username });
+                SELECT * FROM 
+                    users 
+                WHERE 
+                    username = @username",
+                new { username });
+        }
+
+        public Task Update(User user)
+        {
+            return DbConnection.ExecuteAsync(@"
+                UPDATE users
+                SET 
+                    password = @password
+                WHERE
+                    id = @id
+                ",
+                new { id = user.Id, password = user.Password });
         }
     }
 }
