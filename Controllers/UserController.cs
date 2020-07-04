@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Junto.Users.Domain;
 using Junto.Users.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Junto.Controllers
@@ -18,12 +19,22 @@ namespace Junto.Controllers
         }
 
         [HttpPost("login")]
-        public Task<User> Login([FromBody] LoginDto loginDto)
+        [AllowAnonymous]
+        public async Task<ActionResult<AuthenticatedUser>> Login([FromBody] LoginDto loginDto)
         {
-            return this.UserService.Login(loginDto.username, loginDto.password);
+            try
+            {
+                var user = await this.UserService.Login(loginDto.username, loginDto.password);
+                return Ok(user);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPost("signup")]
+        [AllowAnonymous]
         public async Task<ActionResult> Signup([FromBody] SignupDto signupDto)
         {
             try
@@ -36,7 +47,6 @@ namespace Junto.Controllers
                 return BadRequest(e.Message);
             }
         }
-
 
         public class SignupDto
         {
