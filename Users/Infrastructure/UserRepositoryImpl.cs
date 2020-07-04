@@ -1,18 +1,45 @@
+using System.Data;
 using System.Threading.Tasks;
+using Dapper;
 using Junto.Users.Domain;
 
 namespace Junto.Users.Infrastructure
 {
     public class UserRepositoryImpl : IUserRepository
     {
-        public Task Create(User user)
+
+        private readonly IDbConnection DbConnection; 
+
+        public UserRepositoryImpl(IDbConnection dbConnection)
         {
-            throw new System.NotImplementedException();
+            this.DbConnection = dbConnection;
+        }
+
+        public async Task Create(User user)
+        {
+            await DbConnection.ExecuteAsync(@"
+                INSERT INTO users
+                    (id,
+                    username,
+                    password)
+                VALUES
+                    (@id,
+                    @username,
+                    @password)",
+                new {
+                    id = user.Id,
+                    username = user.Username,
+                    password = user.Password
+            });
         }
 
         public Task<User> FindByuserName(string username)
         {
-            throw new System.NotImplementedException();
+            return DbConnection.QuerySingleOrDefaultAsync<User>(@"
+            SELECT * FROM 
+                users 
+            WHERE username = @username",
+            new { username });
         }
     }
 }

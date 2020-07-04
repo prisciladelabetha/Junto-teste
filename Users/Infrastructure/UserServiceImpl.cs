@@ -22,9 +22,14 @@ namespace Junto.Users.Infrastructure
             return await Task.Run( () => new User(Guid.NewGuid(), username, password));
         }
 
-        public Task Signup(string username, string password)
+        public async Task Signup(string username, string password)
         {
-            throw new System.NotImplementedException();
+            if(await this.UserRepository.FindByuserName(username) != null)
+            {
+                throw new Exception("User already registered");
+            }
+
+            await this.UserRepository.Create(new User(Guid.NewGuid(), username, password));
         }
     }
 }
