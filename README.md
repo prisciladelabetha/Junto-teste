@@ -2,8 +2,8 @@
 
 Para rodar a aplicação:
 
-1. `docker-compose up -d` - sobe os containers do PostgreSQL (banco na porta 15432, pgAdmin na porta 16543).
-2. `cd JuntoUserApplication`
+1. `cd JuntoUserApplication`
+2. `docker-compose up -d` - sobe os containers do PostgreSQL (banco na porta 15432, pgAdmin na porta 16543).
 3. `dotnet restore`
 4. `dotnet run` - servidor sobe na porta 5000
 
