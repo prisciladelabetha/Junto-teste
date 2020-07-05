@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Junto.Users.Domain;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Junto.Users.Infrastructure
@@ -12,12 +12,16 @@ namespace Junto.Users.Infrastructure
     public class UserServiceImpl : IUserService
     {
         private readonly IUserRepository UserRepository;
-        private readonly string JwtSecret;
+        private readonly IPasswordService PasswordService;
+        private readonly JwtSettings JwtSettings;
 
-        public UserServiceImpl(IUserRepository userRepository, IConfiguration configuration)
+        public UserServiceImpl(IUserRepository userRepository,
+            IPasswordService passwordService,
+            IOptions<JwtSettings> jwtSettingsAccessor)
         {
             this.UserRepository = userRepository;
-            this.JwtSecret = configuration.GetValue<string>("JwtSecret");
+            this.JwtSettings = jwtSettingsAccessor.Value;
+            this.PasswordService = passwordService;
         }
 
         public async Task ChangePassword(string username, string oldPassoword, string newPassword)
@@ -28,11 +32,11 @@ namespace Junto.Users.Infrastructure
             if (newPassword.Length < 6)
                 throw new Exception("Password must be have at least 6 characters.");
 
-            var user = await this.UserRepository.FindByuserName(username);
-            if(user == null || !BCrypt.Net.BCrypt.Verify(oldPassoword, user.Password))
+            var user = await this.UserRepository.FindByUsername(username);
+            if(user == null || !this.PasswordService.VerifyPassword(oldPassoword, user.Password))
                 throw new Exception("Invalid username or password");
             
-            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.Password = this.PasswordService.HashPassword(newPassword);
             
             await this.UserRepository.Update(user);
 
@@ -43,8 +47,8 @@ namespace Junto.Users.Infrastructure
             if (username == null || password == null)
                 throw new Exception("Invalid username or password");
 
-            var user = await this.UserRepository.FindByuserName(username);
-            if(BCrypt.Net.BCrypt.Verify(password, user.Password))
+            var user = await this.UserRepository.FindByUsername(username);
+            if(this.PasswordService.VerifyPassword(password, user.Password))
                 return new AuthenticatedUser(user.Id, user.Username, GenerateToken(user.Username));
 
             throw new Exception("Invalid username or password");
@@ -61,17 +65,17 @@ namespace Junto.Users.Infrastructure
             if (username.Length < 6)
                 throw new Exception("Username must be have at least 6 characters.");    
 
-            if(await this.UserRepository.FindByuserName(username) != null)
+            if(await this.UserRepository.FindByUsername(username) != null)
                 throw new Exception("User already registered");
 
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+            var hashedPassword = this.PasswordService.HashPassword(password);
 
             await this.UserRepository.Create(new User(Guid.NewGuid(), username, hashedPassword));
         }
 
         private string GenerateToken(string username)
         {
-            var key = Encoding.ASCII.GetBytes(this.JwtSecret);
+            var key = Encoding.ASCII.GetBytes(this.JwtSettings.JwtSecret);
 
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new Claim[] {

@@ -36,7 +36,9 @@ namespace Junto
             services.AddControllers();
             services.AddScoped<IUserRepository, UserRepositoryImpl>();
             services.AddScoped<IUserService, UserServiceImpl>();
+            services.AddScoped<IPasswordService, PasswordServiceImpl>();
             services.AddTransient<IDbConnection>(p => new NpgsqlConnection(connectionString));
+            services.Configure<JwtSettings>(this.Configuration.GetSection("JwtSettings"));
 
             services.AddAuthentication(a =>
             {
@@ -45,7 +47,8 @@ namespace Junto
             })
             .AddJwtBearer(a =>
             {
-                var key = Encoding.ASCII.GetBytes(this.Configuration.GetValue<string>("JwtSecret"));
+                var s = this.Configuration.GetSection("JwtSettings").GetValue<string>("JwtSecret");
+                var key = Encoding.ASCII.GetBytes(s);
                 a.RequireHttpsMetadata = false;
                 a.SaveToken = true;
                 a.TokenValidationParameters = new TokenValidationParameters

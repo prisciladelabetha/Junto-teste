@@ -15,6 +15,6 @@ namespace Junto.Users.Domain
             this.Id = id;
             this.Username = username;
             this.Password = password;
-        } 
+        }
     }
 }

@@ -6,6 +6,6 @@ namespace Junto.Users.Domain
     {
         Task Create(User user);
         Task Update(User user);
-        Task<User> FindByuserName(string username);
+        Task<User> FindByUsername(string username);
     }
 }

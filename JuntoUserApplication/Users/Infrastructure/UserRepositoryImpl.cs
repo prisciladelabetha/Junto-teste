@@ -33,7 +33,7 @@ namespace Junto.Users.Infrastructure
             });
         }
 
-        public Task<User> FindByuserName(string username)
+        public Task<User> FindByUsername(string username)
         {
             return DbConnection.QuerySingleOrDefaultAsync<User>(@"
                 SELECT * FROM 
