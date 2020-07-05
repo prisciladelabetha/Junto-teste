@@ -33,7 +33,7 @@ namespace JuntoUserApplication.Tests
 
             passwordServiceMock
                 .Verify(mock =>
-                    mock.HashPassword(It.IsAny<string>()), Times.Once());
+                    mock.HashPassword(password),Times.Once());
 
             userRepositoryMock
                 .Verify(mock =>
@@ -50,7 +50,7 @@ namespace JuntoUserApplication.Tests
 
             Moq.Mock<IUserRepository> userRepositoryMock = new Moq.Mock<IUserRepository>();
             Moq.Mock<IPasswordService> passwordServiceMock = new Moq.Mock<IPasswordService>();
-                IOptions<JwtSettings> jwtSettingsMock = Options.Create<JwtSettings>(new JwtSettings { JwtSecret = "fedaf7d8863b48e197b9287d492b708e" });
+            IOptions<JwtSettings> jwtSettingsMock = Options.Create<JwtSettings>(new JwtSettings { JwtSecret = "fedaf7d8863b48e197b9287d492b708e" });
 
             userRepositoryMock.Setup(mock => mock.FindByUsername(username)).Returns(Task.Run(() => new User(Guid.NewGuid(), username, hashedPassword)));
             passwordServiceMock.Setup(mock => mock.VerifyPassword(wrongPassword, hashedPassword)).Returns(false);
@@ -65,6 +65,8 @@ namespace JuntoUserApplication.Tests
 
             userRepositoryMock
                 .Verify(mock => mock.FindByUsername(username), Times.Exactly(2));
+
+            Assert.Equal(username, authenticatedUser.Username);
         }
     }
 }

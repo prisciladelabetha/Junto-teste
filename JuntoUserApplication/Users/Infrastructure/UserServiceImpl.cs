@@ -27,14 +27,14 @@ namespace Junto.Users.Infrastructure
         public async Task ChangePassword(string username, string oldPassoword, string newPassword)
         {
             if (username == null || oldPassoword == null)
-                throw new Exception("Invalid username or password");
+                throw new Exception("Invalid password");
 
             if (newPassword.Length < 6)
                 throw new Exception("Password must be have at least 6 characters.");
 
             var user = await this.UserRepository.FindByUsername(username);
             if(user == null || !this.PasswordService.VerifyPassword(oldPassoword, user.Password))
-                throw new Exception("Invalid username or password");
+                throw new Exception("Invalid password.");
             
             user.Password = this.PasswordService.HashPassword(newPassword);
             
